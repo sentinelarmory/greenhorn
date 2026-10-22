@@ -145,6 +145,10 @@ Inside Linux, remove the two lines starting at `# greenhorn-fixed-ip` from `/etc
 (nearly every PC from the last ten years), an administrator account, and a sense of humour
 (optional, but recommended).
 
+> 🏴‍☠️ **Does a streaming harbor tempt you?** The good ship [Tortugarr](https://github.com/tortugarr/tortugarr)
+> has docked here: your own streaming service on your own TV, no subscriptions. Greenhorn's
+> step 9 fetches it for you.
+
 <h2 align="center"><img src="docs/readme/h-hood.svg" alt="Under the hood"></h2>
 
 One file, nothing to install first, no telemetry. The `.bat` is a tiny launcher that hands
