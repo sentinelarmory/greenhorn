@@ -250,11 +250,14 @@ def main():
 
     oops = [
         ("  [DRY-RUN] Back up the old .wslconfig", "#ffaf00", False),
+        ("            > copy C:\\Users\\you\\.wslconfig -> C:\\Users\\you\\.wslconfig.bak-20261022-112335", "#808080", False),
         ("", "", False),
         ("  Yikes, an error! But only a teeny tiny one.", "#ff5f5f", False),
-        ("     (What happened: Back up the old .wslconfig went belly up)", "#808080", False),
+        ("     (What happened: Back up the old .wslconfig went belly up (just pretend - this is the", "#808080", False),
+        ("      --oops test))", "#808080", False),
         ('  Relax! Even the best of us hear "no" now and then. Sentinel has got your back!', "#ffafff", False),
-        ("  Do this and we're back on track: take a screenshot (Win+Shift+S) and send it to Sentinel.", "#ffffaf", False),
+        ("  Do this and we're back on track: Take a screenshot (Win+Shift+S) and send it to Sentinel -", "#ffffaf", False),
+        ("  we'll take it from there.", "#ffffaf", False),
         ("", "", False),
         ("  *** Look at you go! You'll be fixing other people's computers next! ***", YELLOW, True),
     ]

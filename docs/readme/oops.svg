@@ -1,39 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="958" height="276" viewBox="0 0 958 276" role="img" aria-label="Sentinel Greenhorn - when it goes wrong" font-family="Cascadia Mono, Consolas, 'DejaVu Sans Mono', Menlo, monospace" font-size="16" xml:space="preserve">
+<svg xmlns="http://www.w3.org/2000/svg" width="958" height="348" viewBox="0 0 958 348" role="img" aria-label="Sentinel Greenhorn - when it goes wrong" font-family="Cascadia Mono, Consolas, 'DejaVu Sans Mono', Menlo, monospace" font-size="16" xml:space="preserve">
 <defs>
   <filter id="ooglow" x="-5%" y="-50%" width="110%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   <pattern id="ooscan" width="4" height="3" patternUnits="userSpaceOnUse"><rect width="4" height="1" fill="#ffffff" opacity=".035"/></pattern>
 </defs>
-<rect width="958" height="276" rx="10" fill="#0b0b12" stroke="#2c2c3e"/>
+<rect width="958" height="348" rx="10" fill="#0b0b12" stroke="#2c2c3e"/>
 <path d="M10 0 H948 A10 10 0 0 1 958 10 V34 H0 V10 A10 10 0 0 1 10 0 Z" fill="#1b1b28"/>
 <rect x="12" y="6" width="330" height="28" rx="6" fill="#0b0b12"/>
 <rect x="24" y="14" width="13" height="13" rx="3" fill="#5fffff"/>
 <text x="46" y="25" font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="#c9c9da">Sentinel Greenhorn - when it goes wrong</text>
 <text x="848" y="25" font-family="Segoe UI, system-ui, sans-serif" font-size="14" fill="#9a9ab0">&#8212;   &#9744;   &#10005;</text>
-<rect width="0" height="0"><animate id="ooloop" attributeName="x" from="0" to="0" dur="14.40s" begin="0s;ooloop.end"/></rect>
+<rect width="0" height="0"><animate id="ooloop" attributeName="x" from="0" to="0" dur="18.02s" begin="0s;ooloop.end"/></rect>
 <clipPath id="ooc0"><rect x="22" y="42" width="0" height="24">
   <set attributeName="width" to="0" begin="ooloop.begin"/>
   <animate attributeName="width" values="0.0;9.6;19.2;28.8;38.4;48.0;57.6;67.2;76.8;86.4;96.0;105.6;115.2;124.8;134.4;144.0;153.6;163.2;172.8;182.4;192.0;201.6;211.2;220.8;230.4;240.0;249.6;259.2;268.8;278.4;288.0;297.6;307.2;316.8;326.4;336.0;345.6;355.2;364.8" calcMode="discrete" dur="0.76s" begin="ooloop.begin+0.60s" fill="freeze"/>
 </rect></clipPath>
-<text x="22" y="58" textLength="364.8" lengthAdjust="spacingAndGlyphs" fill="#ffaf00" clip-path="url(#ooc0)">  [DRY-RUN] Back up the old .wslconfig</text><clipPath id="ooc2"><rect x="22" y="90" width="0" height="24">
+<text x="22" y="58" textLength="364.8" lengthAdjust="spacingAndGlyphs" fill="#ffaf00" clip-path="url(#ooc0)">  [DRY-RUN] Back up the old .wslconfig</text><clipPath id="ooc1"><rect x="22" y="66" width="0" height="24">
   <set attributeName="width" to="0" begin="ooloop.begin"/>
-  <animate attributeName="width" values="0.0;10.8;21.6;32.4;43.2;54.0;64.8;75.6;86.4;97.2;108.0;118.8;129.6;140.4;151.2;162.0;172.8;183.6;194.4;205.2;216.0;226.8;237.6;248.4;259.2;270.0;280.8;291.6;302.4;313.2;324.0;334.8;345.6;356.4;367.2;378.0;388.8;399.6;410.4;421.2;432.0" calcMode="discrete" dur="0.90s" begin="ooloop.begin+1.63s" fill="freeze"/>
+  <animate attributeName="width" values="0.0;21.4;42.7;64.1;85.4;106.8;128.2;149.5;170.9;192.2;213.6;235.0;256.3;277.7;299.0;320.4;341.8;363.1;384.5;405.8;427.2;448.6;469.9;491.3;512.6;534.0;555.4;576.7;598.1;619.4;640.8;662.2;683.5;704.9;726.2;747.6;769.0;790.3;811.7;833.0;854.4" calcMode="discrete" dur="1.78s" begin="ooloop.begin+1.48s" fill="freeze"/>
 </rect></clipPath>
-<text x="22" y="106" textLength="432.0" lengthAdjust="spacingAndGlyphs" fill="#ff5f5f" clip-path="url(#ooc2)">  Yikes, an error! But only a teeny tiny one.</text><clipPath id="ooc3"><rect x="22" y="114" width="0" height="24">
+<text x="22" y="82" textLength="854.4" lengthAdjust="spacingAndGlyphs" fill="#808080" clip-path="url(#ooc1)">            &gt; copy C:\Users\you\.wslconfig -&gt; C:\Users\you\.wslconfig.bak-20261022-112335</text><clipPath id="ooc3"><rect x="22" y="114" width="0" height="24">
   <set attributeName="width" to="0" begin="ooloop.begin"/>
-  <animate attributeName="width" values="0.0;14.9;29.8;44.6;59.5;74.4;89.3;104.2;119.0;133.9;148.8;163.7;178.6;193.4;208.3;223.2;238.1;253.0;267.8;282.7;297.6;312.5;327.4;342.2;357.1;372.0;386.9;401.8;416.6;431.5;446.4;461.3;476.2;491.0;505.9;520.8;535.7;550.6;565.4;580.3;595.2" calcMode="discrete" dur="1.24s" begin="ooloop.begin+2.65s" fill="freeze"/>
+  <animate attributeName="width" values="0.0;10.8;21.6;32.4;43.2;54.0;64.8;75.6;86.4;97.2;108.0;118.8;129.6;140.4;151.2;162.0;172.8;183.6;194.4;205.2;216.0;226.8;237.6;248.4;259.2;270.0;280.8;291.6;302.4;313.2;324.0;334.8;345.6;356.4;367.2;378.0;388.8;399.6;410.4;421.2;432.0" calcMode="discrete" dur="0.90s" begin="ooloop.begin+3.53s" fill="freeze"/>
 </rect></clipPath>
-<text x="22" y="130" textLength="595.2" lengthAdjust="spacingAndGlyphs" fill="#808080" clip-path="url(#ooc3)">     (What happened: Back up the old .wslconfig went belly up)</text><clipPath id="ooc4"><rect x="22" y="138" width="0" height="24">
+<text x="22" y="130" textLength="432.0" lengthAdjust="spacingAndGlyphs" fill="#ff5f5f" clip-path="url(#ooc3)">  Yikes, an error! But only a teeny tiny one.</text><clipPath id="ooc4"><rect x="22" y="138" width="0" height="24">
   <set attributeName="width" to="0" begin="ooloop.begin"/>
-  <animate attributeName="width" values="0.0;19.2;38.4;57.6;76.8;96.0;115.2;134.4;153.6;172.8;192.0;211.2;230.4;249.6;268.8;288.0;307.2;326.4;345.6;364.8;384.0;403.2;422.4;441.6;460.8;480.0;499.2;518.4;537.6;556.8;576.0;595.2;614.4;633.6;652.8;672.0;691.2;710.4;729.6;748.8;768.0" calcMode="discrete" dur="1.60s" begin="ooloop.begin+4.01s" fill="freeze"/>
+  <animate attributeName="width" values="0.0;21.4;42.7;64.1;85.4;106.8;128.2;149.5;170.9;192.2;213.6;235.0;256.3;277.7;299.0;320.4;341.8;363.1;384.5;405.8;427.2;448.6;469.9;491.3;512.6;534.0;555.4;576.7;598.1;619.4;640.8;662.2;683.5;704.9;726.2;747.6;769.0;790.3;811.7;833.0;854.4" calcMode="discrete" dur="1.78s" begin="ooloop.begin+4.55s" fill="freeze"/>
 </rect></clipPath>
-<text x="22" y="154" textLength="768.0" lengthAdjust="spacingAndGlyphs" fill="#ffafff" clip-path="url(#ooc4)">  Relax! Even the best of us hear "no" now and then. Sentinel has got your back!</text><clipPath id="ooc5"><rect x="22" y="162" width="0" height="24">
+<text x="22" y="154" textLength="854.4" lengthAdjust="spacingAndGlyphs" fill="#808080" clip-path="url(#ooc4)">     (What happened: Back up the old .wslconfig went belly up (just pretend - this is the</text><clipPath id="ooc5"><rect x="22" y="162" width="0" height="24">
   <set attributeName="width" to="0" begin="ooloop.begin"/>
-  <animate attributeName="width" values="0.0;21.8;43.7;65.5;87.4;109.2;131.0;152.9;174.7;196.6;218.4;240.2;262.1;283.9;305.8;327.6;349.4;371.3;393.1;415.0;436.8;458.6;480.5;502.3;524.2;546.0;567.8;589.7;611.5;633.4;655.2;677.0;698.9;720.7;742.6;764.4;786.2;808.1;829.9;851.8;873.6" calcMode="discrete" dur="1.82s" begin="ooloop.begin+5.73s" fill="freeze"/>
+  <animate attributeName="width" values="0.0;9.6;19.2;28.8;38.4;48.0;57.6;67.2;76.8;86.4;96.0;105.6;115.2;124.8;134.4;144.0;153.6;163.2;172.8;182.4" calcMode="discrete" dur="0.38s" begin="ooloop.begin+6.45s" fill="freeze"/>
 </rect></clipPath>
-<text x="22" y="178" textLength="873.6" lengthAdjust="spacingAndGlyphs" fill="#ffffaf" clip-path="url(#ooc5)">  Do this and we're back on track: take a screenshot (Win+Shift+S) and send it to Sentinel.</text><clipPath id="ooc7"><rect x="22" y="210" width="0" height="24">
+<text x="22" y="178" textLength="182.4" lengthAdjust="spacingAndGlyphs" fill="#808080" clip-path="url(#ooc5)">      --oops test))</text><clipPath id="ooc6"><rect x="22" y="186" width="0" height="24">
   <set attributeName="width" to="0" begin="ooloop.begin"/>
-  <animate attributeName="width" values="0.0;17.5;35.0;52.6;70.1;87.6;105.1;122.6;140.2;157.7;175.2;192.7;210.2;227.8;245.3;262.8;280.3;297.8;315.4;332.9;350.4;367.9;385.4;403.0;420.5;438.0;455.5;473.0;490.6;508.1;525.6;543.1;560.6;578.2;595.7;613.2;630.7;648.2;665.8;683.3;700.8" calcMode="discrete" dur="1.46s" begin="ooloop.begin+7.82s" fill="freeze"/>
+  <animate attributeName="width" values="0.0;19.2;38.4;57.6;76.8;96.0;115.2;134.4;153.6;172.8;192.0;211.2;230.4;249.6;268.8;288.0;307.2;326.4;345.6;364.8;384.0;403.2;422.4;441.6;460.8;480.0;499.2;518.4;537.6;556.8;576.0;595.2;614.4;633.6;652.8;672.0;691.2;710.4;729.6;748.8;768.0" calcMode="discrete" dur="1.60s" begin="ooloop.begin+6.95s" fill="freeze"/>
 </rect></clipPath>
-<text x="22" y="226" textLength="700.8" lengthAdjust="spacingAndGlyphs" fill="#ffff00" clip-path="url(#ooc7)" filter="url(#ooglow)">  *** Look at you go! You'll be fixing other people's computers next! ***</text>
-<rect y="34" width="958" height="242" fill="url(#ooscan)"/>
+<text x="22" y="202" textLength="768.0" lengthAdjust="spacingAndGlyphs" fill="#ffafff" clip-path="url(#ooc6)">  Relax! Even the best of us hear "no" now and then. Sentinel has got your back!</text><clipPath id="ooc7"><rect x="22" y="210" width="0" height="24">
+  <set attributeName="width" to="0" begin="ooloop.begin"/>
+  <animate attributeName="width" values="0.0;22.1;44.2;66.2;88.3;110.4;132.5;154.6;176.6;198.7;220.8;242.9;265.0;287.0;309.1;331.2;353.3;375.4;397.4;419.5;441.6;463.7;485.8;507.8;529.9;552.0;574.1;596.2;618.2;640.3;662.4;684.5;706.6;728.6;750.7;772.8;794.9;817.0;839.0;861.1;883.2" calcMode="discrete" dur="1.84s" begin="ooloop.begin+8.67s" fill="freeze"/>
+</rect></clipPath>
+<text x="22" y="226" textLength="883.2" lengthAdjust="spacingAndGlyphs" fill="#ffffaf" clip-path="url(#ooc7)">  Do this and we're back on track: Take a screenshot (Win+Shift+S) and send it to Sentinel -</text><clipPath id="ooc8"><rect x="22" y="234" width="0" height="24">
+  <set attributeName="width" to="0" begin="ooloop.begin"/>
+  <animate attributeName="width" values="0.0;9.6;19.2;28.8;38.4;48.0;57.6;67.2;76.8;86.4;96.0;105.6;115.2;124.8;134.4;144.0;153.6;163.2;172.8;182.4;192.0;201.6;211.2;220.8;230.4;240.0;249.6;259.2" calcMode="discrete" dur="0.54s" begin="ooloop.begin+10.63s" fill="freeze"/>
+</rect></clipPath>
+<text x="22" y="250" textLength="259.2" lengthAdjust="spacingAndGlyphs" fill="#ffffaf" clip-path="url(#ooc8)">  we'll take it from there.</text><clipPath id="ooc10"><rect x="22" y="282" width="0" height="24">
+  <set attributeName="width" to="0" begin="ooloop.begin"/>
+  <animate attributeName="width" values="0.0;17.5;35.0;52.6;70.1;87.6;105.1;122.6;140.2;157.7;175.2;192.7;210.2;227.8;245.3;262.8;280.3;297.8;315.4;332.9;350.4;367.9;385.4;403.0;420.5;438.0;455.5;473.0;490.6;508.1;525.6;543.1;560.6;578.2;595.7;613.2;630.7;648.2;665.8;683.3;700.8" calcMode="discrete" dur="1.46s" begin="ooloop.begin+11.44s" fill="freeze"/>
+</rect></clipPath>
+<text x="22" y="298" textLength="700.8" lengthAdjust="spacingAndGlyphs" fill="#ffff00" clip-path="url(#ooc10)" filter="url(#ooglow)">  *** Look at you go! You'll be fixing other people's computers next! ***</text>
+<rect y="34" width="958" height="314" fill="url(#ooscan)"/>
 </svg>

@@ -279,13 +279,17 @@
     <div class="wrap">
       <h2>What it changes <span class="alt">on your PC</span></h2>
       <div class="panel">
+        <p class="c-dim" style="margin-top:0">It asks before restarting the PC and before the disk clean-up.</p>
         <ul class="honest">
-          <li>Windows features: <i>Windows Subsystem for Linux</i> and <i>Virtual Machine Platform</i>.</li>
-          <li><code>%USERPROFILE%\.wslconfig</code> (the old one is backed up first).</li>
-          <li>Fixed IP option: a line in <code>/etc/wsl.conf</code>, a scheduled task <code>Greenhorn-WSL-FixedIP</code>, a helper script in <code>C:\ProgramData\GreenhornWSL</code>, and <code>wsl.local</code> in the hosts file.</li>
-          <li>During the run only: the restart safety net and, if you use it, a temporary firewall rule for the APK shop. Both are removed again.</li>
+          <li><b>Windows:</b> switches on <i>Windows Subsystem for Linux</i> and <i>Virtual Machine Platform</i>, runs <code>wsl --update</code> and <code>wsl --set-default-version 2</code>, and switches the Windows hypervisor back on if it was off.</li>
+          <li><code>%USERPROFILE%\.wslconfig</code> is replaced with a new one (not merged); the old one is backed up first. The Linux disk is made sparse.</li>
+          <li><b>Fixed IP option:</b> two lines in <code>/etc/wsl.conf</code>, a scheduled task <code>Greenhorn-WSL-FixedIP</code> (at logon and every 5 minutes), a helper script in <code>C:\ProgramData\GreenhornWSL</code>, and <code>wsl.local</code> in the hosts file. Everything is backed up first.</li>
+          <li><b>Disk clean-up, in every Linux distro except docker-desktop:</b> clears the apt cache and package lists, trims the journal to 50 MB, and <b>deletes everything in <code>/tmp</code> and <code>/var/tmp</code></b>.</li>
+          <li><b>Tortugarr step:</b> downloads into <code>Downloads\Tortugarr</code> and puts the server install commands on the clipboard.</li>
+          <li><b>During the run only:</b> the restart safety net and, if you use it, a temporary firewall rule for the APK shop. Both are removed again.</li>
+          <li><b>Left behind on purpose:</b> a copy of the installer in <code>C:\ProgramData\GreenhornWSL</code>, so it can be run again later, and a log in <code>%TEMP%</code>.</li>
         </ul>
-        <p class="c-dim">Everything is in one readable file. No downloads, no dependencies, no telemetry.</p>
+        <p class="c-dim">Everything is in one readable file. Nothing to install first, no telemetry. It only talks to Microsoft (WSL and Ubuntu) and GitHub (the Tortugarr release). Found a bug? <a href="https://github.com/sentinelarmory/greenhorn/issues">Open an issue</a>.</p>
       </div>
     </div>
   </section>
@@ -717,15 +721,15 @@
 
   // ---------- the steps, typed out as you scroll ----------
   const STEPS = [
-    ['Saying hello to your PC', 'Checks Windows, memory, disk space and virtualization. Off in the BIOS? It finds out who made your PC, tells you which menu to look in, and restarts straight into the BIOS for you.'],
-    ['The WSL engine', 'Switches on the right Windows features, with a plan B (DISM) if the normal way fails.'],
-    ['Picking a Linux', 'Installs Ubuntu and explains the username and password prompt in plain words. (The password does NOT show while you type. Totally normal.)'],
+    ['Saying hello to your PC', 'Checks Windows, memory, disk space and virtualization. Off in the BIOS? It finds out who made your PC and tells you which menu to look in. On UEFI PCs (nearly every Windows 11 PC) it restarts straight into the BIOS for you; on older PCs it tells you which key to press.'],
+    ['The WSL engine', 'Switches on the right Windows features with wsl --install, with a plan B (DISM) if the normal way fails.'],
+    ['Picking a Linux', 'Updates WSL and installs Ubuntu (or uses the distro you already have), explaining the username and password prompt in plain words. (The password does NOT show while you type. Totally normal.)'],
     ['Fixed IP address', 'Sniffs out your router, picks a private network that clashes with nothing, checks the addresses are free, and gives Linux an IP that never changes.'],
-    ['Speed and memory', 'A sensible .wslconfig: memory limit, swap, memory reclaim and a sparse disk that shrinks by itself.'],
+    ['Speed and memory', 'A new .wslconfig (the old one is backed up): half of the memory, 4 GB swap, memory reclaim and a sparse disk that shrinks by itself.'],
     ['Setting up the fixed IP', 'Both sides of the link, plus the name wsl.local in the Windows hosts file.'],
-    ['Spring cleaning the disk', 'Takes out the trash inside Linux and compacts the virtual disk, so the space actually comes back to Windows.'],
-    ['Does Linux work? (the big test)', 'Linux answers, runs WSL 2, has systemd and can reach the internet.'],
-    ['Next stop: Tortugarr on GitHub!', 'A bonus: downloads the Tortugarr server installer and apps, checks the checksums, and can even serve the apps to your TV and phone over Wi-Fi.'],
+    ['Spring cleaning the disk', 'Asks first, then takes out the trash inside every Linux distro (apt cache, old logs, /tmp) and compacts the virtual disks, so the space actually comes back to Windows.'],
+    ['Does Linux work? (the big test)', 'Linux answers, runs WSL 2, has systemd, and can look up addresses on the internet (a DNS check).'],
+    ['Next stop: Tortugarr on GitHub!', 'A bonus: downloads the Tortugarr server installer and apps into Downloads\\Tortugarr, checks the checksums, can serve the apps to your TV and phone over Wi-Fi, and puts the server install commands on the clipboard.'],
     ['Done! Hooray!', 'A fireworks finale, a list of handy tricks, and the safety net is taken down again.']
   ];
   const CHEERS = ['Yay! You did it!', 'Hooray! Give yourself a pat on the back, Mr. Greenhorn!', 'Brilliant, Mr. Greenhorn! Bang on target!',
@@ -758,12 +762,13 @@
 
   // ---------- the oops demo ----------
   const OOPS = [
-    ['c-dim', "  [DRY-RUN] Back up the old .wslconfig"],
+    ['c-warn', "  [DRY-RUN] Back up the old .wslconfig"],
+    ['c-dim', "            > copy C:\\Users\\you\\.wslconfig -> C:\\Users\\you\\.wslconfig.bak-20261022-112335"],
     ['', ''],
     ['c-oops', '  Yikes, an error! But only a teeny tiny one.'],
-    ['c-dim', '     (What happened: Back up the old .wslconfig went belly up)'],
+    ['c-dim', '     (What happened: Back up the old .wslconfig went belly up (just pretend - this is the --oops test))'],
     ['c-comfort', '  Relax! Even the best of us hear "no" now and then. Sentinel has got your back!'],
-    ['c-fix', "  Do this and we're back on track: take a screenshot (Win+Shift+S) and send it to Sentinel - we'll take it from there."],
+    ['c-fix', "  Do this and we're back on track: Take a screenshot (Win+Shift+S) and send it to Sentinel - we'll take it from there."],
     ['', ''],
     ['c-yay', "  *** Look at you go! You'll be fixing other people's computers next! ***"]
   ];

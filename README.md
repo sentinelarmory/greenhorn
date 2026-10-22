@@ -44,24 +44,31 @@ it left off.
 <summary><b>The ten steps in detail</b></summary>
 
 1. **Saying hello to your PC**: checks the Windows version, free disk space, memory and that
-   virtualization is on. If it's off in the BIOS, it finds out who made your PC, tells you
-   exactly which menu to look in, and restarts straight into the BIOS for you.
-2. **The WSL engine**: switches on the right Windows features, with a plan B (DISM) if the
-   normal way fails.
-3. **Picking a Linux**: installs Ubuntu, and explains the username and password prompt in
-   plain words.
+   virtualization is on. If it's off in the BIOS, it finds out who made your PC and tells you
+   exactly which menu to look in. On UEFI PCs (nearly every Windows 11 PC) it restarts
+   straight into the BIOS for you; on older PCs it restarts and tells you which key to press.
+   If virtualization is on but the Windows hypervisor has been switched off (some games do
+   that), it switches it back on.
+2. **The WSL engine**: switches on the right Windows features with `wsl --install`, with a
+   plan B (DISM) if the normal way fails.
+3. **Picking a Linux**: updates WSL, makes WSL 2 the default, and installs Ubuntu (or
+   Ubuntu 24.04), explaining the username and password prompt in plain words. Already have a
+   distro? Then it uses that one.
 4. **Fixed IP address**: sniffs out your router and home network, picks a private network for
    WSL that clashes with nothing (LAN, VPN, Hyper-V), checks the addresses are free, and gives
    Linux an IP that never changes. Or mirrored networking, if you prefer.
-5. **Speed and memory**: a sensible `.wslconfig` (memory limit, swap, memory reclaim, sparse disk).
+5. **Speed and memory**: writes a new `.wslconfig` (half of the PC's memory, 4 GB swap, memory
+   reclaim, sparse disk) and makes the Linux disk sparse.
 6. **Setting up the fixed IP** on both sides, plus the name `wsl.local` in the Windows hosts file.
-7. **Spring cleaning the disk**: tidies up inside Linux and compacts the virtual disk, so the
-   space actually comes back to Windows.
-8. **Does Linux work? (the big test)**: Linux answers, runs WSL 2, has systemd and can reach
-   the internet.
+7. **Spring cleaning the disk** (it asks first): tidies up inside every Linux distro and compacts
+   the virtual disks, so the space actually comes back to Windows.
+8. **Does Linux work? (the big test)**: Linux answers, runs WSL 2, has systemd, and can look
+   up addresses on the internet (a DNS check).
 9. **Next stop: [Tortugarr](https://github.com/tortugarr/tortugarr)**: downloads the server
-   installer and the TV/phone apps, checks the checksums, explains how to get the apps onto an
-   Android TV and phone, and can even serve them over Wi-Fi with a short address.
+   installer and the phone app (and the TV app if you have an Android TV) into
+   `Downloads\Tortugarr`, checks the checksums, explains how to get the apps onto the TV and
+   phone, and can even serve them over Wi-Fi with a short address. It doesn't install the
+   server: it shows the commands to run and puts them on the clipboard.
 10. **Done! Hooray!** A fireworks finale, a list of handy tricks, and the safety net is taken
     down again.
 
@@ -73,7 +80,11 @@ it left off.
 
 Nobody panics. Every error comes with a plain-words explanation and the exact thing to do
 next. Restarts and trips to the BIOS are covered by a safety net: a one-shot logon task brings
-the installer back after you log in, and is taken down again when everything is done.
+the installer back after you log in, and is taken down again when everything is done (or when
+you choose to stop).
+
+Found a bug, or did something go wrong that the installer couldn't fix? Take a screenshot and
+[open an issue](../../issues).
 
 <h2 align="center"><img src="docs/readme/h-flags.svg" alt="For the curious"></h2>
 
@@ -89,17 +100,33 @@ the installer back after you log in, and is taken down again when everything is 
 
 <h2 align="center"><img src="docs/readme/h-changes.svg" alt="What it changes on your PC"></h2>
 
-Being honest about it, so nothing comes as a surprise:
+Being honest about it, so nothing comes as a surprise. It asks before restarting the PC and
+before the disk clean-up.
 
-- Windows features: *Windows Subsystem for Linux* and *Virtual Machine Platform* (via `wsl --install`).
-- `%USERPROFILE%\.wslconfig` (the old one is backed up as `.wslconfig.bak-<date>`).
-- Fixed IP option: a line in `/etc/wsl.conf` inside Linux, a scheduled task
-  `Greenhorn-WSL-FixedIP`, a helper script in `C:\ProgramData\GreenhornWSL\`, and a
-  `wsl.local` line in the Windows hosts file (backed up as `hosts.bak-greenhorn`).
-- During the run only: the safety net (scheduled task `Greenhorn-WSL-Resume`), removed again
-  when the guide finishes. The temporary firewall rule for the APK shop is removed when you
-  close the shop.
-- A log in `%TEMP%\greenhorn-wsl-helper.log`.
+- **Windows:** switches on *Windows Subsystem for Linux* and *Virtual Machine Platform*
+  (`wsl --install`), runs `wsl --update` and `wsl --set-default-version 2`, and shuts WSL
+  down (`wsl --shutdown`) a few times along the way. If the Windows hypervisor is switched off,
+  it switches it on (`bcdedit /set hypervisorlaunchtype auto`).
+- **`%USERPROFILE%\.wslconfig`** is replaced with a new one, not merged. The old one is backed
+  up as `.wslconfig.bak-<date>` first.
+- **Sparse disk:** `wsl --manage <distro> --set-sparse true`, and if WSL refuses, once more
+  with `--allow-unsafe`.
+- **Fixed IP option:** two lines in `/etc/wsl.conf` inside Linux (backed up as
+  `/etc/wsl.conf.bak-greenhorn`), a scheduled task `Greenhorn-WSL-FixedIP` that runs at logon
+  and every 5 minutes, a helper script in `C:\ProgramData\GreenhornWSL\`, and a `wsl.local` line
+  in the Windows hosts file (backed up as `hosts.bak-greenhorn`).
+- **Disk clean-up, in every Linux distro except `docker-desktop`:** clears the apt cache and
+  package lists, trims the systemd journal to 50 MB, and **deletes everything in `/tmp` and
+  `/var/tmp`**. Then it compacts each virtual disk (`Optimize-VHD`, or `diskpart` on Windows Home).
+- **Tortugarr step:** downloads into `%USERPROFILE%\Downloads\Tortugarr` and puts the server
+  install commands on the clipboard.
+- **During the run only:** the safety net (scheduled task `Greenhorn-WSL-Resume`, plus
+  `resume.json` and `resume.ps1`), removed again when the guide finishes or you stop, and a
+  temporary firewall rule for the APK shop, removed when you close the shop.
+- **Left behind on purpose:** a copy of the installer in `C:\ProgramData\GreenhornWSL\`, so it can
+  be run again later, and a log in `%TEMP%\greenhorn-wsl-helper.log`.
+- **Talks to the internet:** Microsoft (WSL and Ubuntu downloads) and GitHub (the latest
+  Tortugarr release and its files). No telemetry.
 
 <details>
 <summary><b>Undo the fixed IP setup</b></summary>
@@ -120,8 +147,8 @@ Inside Linux, remove the two lines starting at `# greenhorn-fixed-ip` from `/etc
 
 <h2 align="center"><img src="docs/readme/h-hood.svg" alt="Under the hood"></h2>
 
-One file, no downloads, no dependencies, no telemetry. The `.bat` is a tiny launcher that hands
-itself to Windows PowerShell. The fireworks are drawn with ANSI colours and half-block
+One file, nothing to install first, no telemetry. The `.bat` is a tiny launcher that hands
+itself to the Windows PowerShell that comes with Windows. The fireworks are drawn with ANSI colours and half-block
 characters, and the music is a small chiptune synthesizer written in C# that renders the tune
 into memory when the installer starts. The animated images on this page are generated by
 [`tools/readme_svgs.py`](tools/readme_svgs.py), and [`docs/index.html`](docs/index.html) is the
