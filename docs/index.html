@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel Greenhorn</title>
+<meta name="description" content="The WSL installer for dummies. With fireworks. And a chiptune. Obviously.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07060f;
+    --bg2: #120a24;
+    --ink: #e8e6ff;
+    --dim: #8a87a8;
+    --pink: #ff87ff;
+    --violet: #af87ff;
+    --cyan: #5fffff;
+    --cyan-deep: #00afd7;
+    --amber: #ffaf00;
+    --green: #00ff5f;
+    --red: #ff5f5f;
+    --yellow: #ffff00;
+    --term: #0b0b12;
+    --line: #2a2347;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "VT323", "Cascadia Mono", Consolas, monospace;
+    font-size: 22px;
+    line-height: 1.35;
+    overflow-x: hidden;
+  }
+  a { color: var(--cyan); }
+
+  /* ---------- synthwave backdrop ---------- */
+  #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .grid-floor {
+    position: fixed; left: -50%; right: -50%; bottom: -10vh; height: 55vh; z-index: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to top, rgba(255,95,255,.35) 1px, transparent 1px) 0 0 / 100% 40px,
+      linear-gradient(to right, rgba(95,255,255,.25) 1px, transparent 1px) 0 0 / 60px 100%;
+    transform: perspective(300px) rotateX(62deg);
+    transform-origin: bottom;
+    mask-image: linear-gradient(to top, black 10%, transparent 85%);
+    -webkit-mask-image: linear-gradient(to top, black 10%, transparent 85%);
+    animation: floor 2.4s linear infinite;
+    opacity: .55;
+  }
+  @keyframes floor { to { background-position: 0 40px, 0 0; } }
+  .sun {
+    position: fixed; left: 50%; bottom: 30vh; width: 46vmin; height: 46vmin; z-index: 0;
+    transform: translateX(-50%); border-radius: 50%; pointer-events: none; opacity: .28;
+    background: linear-gradient(#ffaf00, #ff5fd7 60%, #af00ff);
+    mask-image: repeating-linear-gradient(to bottom, black 0 14px, transparent 14px 20px);
+    -webkit-mask-image: repeating-linear-gradient(to bottom, black 0 14px, transparent 14px 20px);
+    filter: blur(.5px);
+  }
+
+  main { position: relative; z-index: 1; }
+  .wrap { width: min(1100px, 100% - 32px); margin: 0 auto; }
+
+  /* ---------- hero terminal ---------- */
+  .hero { padding: 48px 0 24px; }
+  .terminal {
+    border-radius: 10px;
+    background: var(--term);
+    border: 1px solid #2c2c3e;
+    box-shadow: 0 0 0 1px rgba(95,255,255,.08), 0 0 40px rgba(175,135,255,.25), 0 30px 80px rgba(0,0,0,.7);
+    overflow: hidden;
+  }
+  .titlebar {
+    display: flex; align-items: center; gap: 10px;
+    height: 34px; padding: 0 12px;
+    background: #1b1b28; border-bottom: 1px solid #2c2c3e;
+    font-family: "Segoe UI", system-ui, sans-serif; font-size: 13px; color: #c9c9da;
+  }
+  .tab {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--term); padding: 6px 14px; border-radius: 6px 6px 0 0; margin-top: 6px;
+  }
+  .tab .ico { width: 14px; height: 14px; border-radius: 3px; background: linear-gradient(135deg, var(--cyan), var(--violet)); }
+  .winbtns { margin-left: auto; display: flex; gap: 18px; color: #9a9ab0; font-size: 14px; }
+  .screen { position: relative; }
+  #tui { display: block; width: 100%; height: auto; cursor: pointer; outline: none; }
+  .scanlines {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay;
+    animation: flicker 6s infinite;
+  }
+  @keyframes flicker { 0%, 97%, 100% { opacity: 1; } 98% { opacity: .75; } }
+  .vignette { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px rgba(0,0,0,.65); }
+  .hint { text-align: center; color: var(--dim); margin-top: 14px; font-size: 20px; }
+  .hint kbd {
+    font-family: inherit; color: var(--ink); border: 1px solid var(--line); border-bottom-width: 3px;
+    border-radius: 4px; padding: 0 6px; background: #151127;
+  }
+
+  /* ---------- sections ---------- */
+  section { padding: 56px 0; }
+  h2 {
+    font-family: "Press Start 2P", monospace; font-size: clamp(16px, 2.4vw, 24px);
+    line-height: 1.5; margin: 0 0 28px; color: var(--pink);
+    text-shadow: 0 0 8px rgba(255,135,255,.7), 0 0 24px rgba(255,135,255,.35);
+  }
+  h2 .alt { color: var(--cyan); text-shadow: 0 0 8px rgba(95,255,255,.7), 0 0 24px rgba(95,255,255,.35); }
+  p.lead { font-size: 26px; max-width: 46ch; color: #d8d4ff; }
+
+  .panel {
+    background: rgba(11,11,18,.82); border: 1px solid var(--line); border-radius: 10px;
+    padding: 22px 24px; backdrop-filter: blur(4px);
+  }
+
+  /* download */
+  .download { display: grid; gap: 28px; grid-template-columns: 1.1fr .9fr; align-items: center; }
+  @media (max-width: 820px) { .download { grid-template-columns: 1fr; } }
+  .btn {
+    position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 10px;
+    font-family: "Press Start 2P", monospace; font-size: 15px; letter-spacing: .5px;
+    color: #06131a; background: linear-gradient(180deg, #9ffcff, var(--cyan) 45%, var(--cyan-deep));
+    padding: 20px 26px; border-radius: 10px; text-decoration: none; border: 0; cursor: pointer;
+    box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, 0 0 24px rgba(95,255,255,.55), 0 0 64px rgba(95,255,255,.25);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, 0 0 34px rgba(95,255,255,.8), 0 0 90px rgba(95,255,255,.35); } }
+  .btn small { font-family: "VT323", monospace; font-size: 18px; letter-spacing: 0; opacity: .8; }
+  #sparks { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+  .steps-mini { margin: 18px 0 0; padding: 0; list-style: none; color: #cfcbe8; }
+  .steps-mini li { margin: 6px 0; }
+  .steps-mini b { color: var(--yellow); font-weight: normal; }
+
+  /* terminal-ish text blocks */
+  .tty { font-family: "VT323", monospace; font-size: 22px; white-space: pre-wrap; }
+  .c-ok { color: var(--green); } .c-info { color: #87d7ff; } .c-warn { color: var(--amber); }
+  .c-yay { color: var(--yellow); text-shadow: 0 0 10px rgba(255,255,0,.45); }
+  .c-oops { color: var(--red); } .c-comfort { color: #ffafff; } .c-fix { color: #ffffaf; } .c-dim { color: #808080; }
+  .rule { color: #00afff; }
+
+  /* steps */
+  .steps { display: grid; gap: 18px; grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 820px) { .steps { grid-template-columns: 1fr; } }
+  .step { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .step.seen { opacity: 1; transform: none; }
+  .step .num { color: #00ffff; }
+  .step .yay { min-height: 1.4em; }
+  .cursor { display: inline-block; width: .6em; background: var(--ink); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* oops demo */
+  .oops-grid { display: grid; gap: 24px; grid-template-columns: 1fr 1fr; align-items: start; }
+  @media (max-width: 820px) { .oops-grid { grid-template-columns: 1fr; } }
+
+  /* flags */
+  table { width: 100%; border-collapse: collapse; font-size: 22px; }
+  td { padding: 8px 10px; border-bottom: 1px dashed var(--line); vertical-align: top; }
+  td:first-child { color: var(--cyan); white-space: nowrap; width: 1%; }
+
+  /* honest list */
+  .honest li { margin: 8px 0; }
+  .honest code, p code, td code { font-family: inherit; color: var(--amber); }
+
+  /* footer marquee */
+  .marquee {
+    overflow: hidden; white-space: nowrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    background: rgba(11,11,18,.85); padding: 10px 0;
+  }
+  .marquee span {
+    display: inline-block; padding-left: 100%;
+    font-family: "Press Start 2P", monospace; font-size: 16px; color: var(--amber);
+    text-shadow: 0 0 10px rgba(255,175,0,.55);
+    animation: marquee 22s linear infinite;
+  }
+  @keyframes marquee { to { transform: translateX(-100%); } }
+  footer { text-align: center; padding: 36px 0 60px; color: var(--dim); }
+  footer .sig { color: var(--pink); font-size: 26px; }
+
+  /* toast */
+  #toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 140%); z-index: 6;
+    background: #151127; border: 1px solid var(--violet); border-radius: 10px; padding: 12px 20px;
+    color: var(--cyan); font-size: 24px; box-shadow: 0 0 30px rgba(175,135,255,.4);
+    transition: transform .35s ease, opacity .35s ease, visibility .35s;
+    opacity: 0; visibility: hidden;
+  }
+  #toast.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .grid-floor, .scanlines, .btn, .marquee span, .cursor { animation: none; }
+    .step { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="sun"></div>
+<div class="grid-floor"></div>
+<canvas id="sparks"></canvas>
+
+<main>
+  <div class="wrap hero">
+    <div class="terminal">
+      <div class="titlebar">
+        <div class="tab"><span class="ico"></span>Sentinel Greenhorn - Help is here!</div>
+        <div class="winbtns"><span>&#8212;</span><span>&#9744;</span><span>&#10005;</span></div>
+      </div>
+      <div class="screen">
+        <canvas id="tui" tabindex="0" aria-label="Sentinel Greenhorn title screen animation"></canvas>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+      </div>
+    </div>
+    <p class="hint">Click the screen or press <kbd>M</kbd> for the disco &#183; <kbd>1</kbd> show me the way &#183; <kbd>2</kbd> get me out of here</p>
+  </div>
+
+  <section id="download">
+    <div class="wrap download">
+      <div>
+        <h2>The WSL installer <span class="alt">for dummies</span></h2>
+        <p class="lead">Installing WSL should not need a computer science degree. One file. Double-click it. Mr. Greenhorn takes it from there, restarts and all.</p>
+        <ul class="steps-mini">
+          <li>1. Download the file.</li>
+          <li>2. Double-click it.</li>
+          <li>3. Windows says <i>"Windows protected your PC"</i>? Click <b>More info &#8594; Run anyway</b>.</li>
+          <li>4. Enjoy the show, press <b>1</b>, and say <b>Yes</b> when Windows asks.</li>
+        </ul>
+      </div>
+      <div style="text-align:center">
+        <a class="btn" id="dl" href="https://github.com/sentinelarmory/greenhorn/releases/latest/download/Sentinel-Greenhorn.bat">
+          <span><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true" style="vertical-align:-2px;margin-right:8px"><path d="M5 0h4v8h4l-6 7-6-7h4z" fill="currentColor"/></svg>Download</span><small>Sentinel-Greenhorn.bat &#183; one file, no installs</small>
+        </a>
+        <p class="c-dim" style="margin-top:16px">Want a sneak peek first? Run it with <code>--dry-run</code>.<br>It shows everything and changes nothing.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="steps">
+    <div class="wrap">
+      <h2>What happens, <span class="alt">step by step</span></h2>
+      <div class="steps" id="stepgrid"></div>
+    </div>
+  </section>
+
+  <section id="oops">
+    <div class="wrap oops-grid">
+      <div>
+        <h2>And when it <span class="alt">goes wrong?</span></h2>
+        <p class="lead">Then nobody panics. Every error comes with a plain-words explanation and the exact thing to do next. Restarts and trips to the BIOS included: a safety net brings the installer back by itself after you log in, and takes itself down again when everything is done.</p>
+      </div>
+      <div class="panel tty" id="oopsdemo"></div>
+    </div>
+  </section>
+
+  <section id="flags">
+    <div class="wrap">
+      <h2>For the <span class="alt">curious</span></h2>
+      <div class="panel">
+        <table>
+          <tr><td>--dry-run</td><td>Show everything, change nothing</td></tr>
+          <tr><td>--fresh</td><td>(with --dry-run) pretend WSL isn't installed, to see the whole install path</td></tr>
+          <tr><td>--oops</td><td>(with --dry-run) pretend something fails, to see how errors are handled</td></tr>
+          <tr><td>--novirt</td><td>(with --dry-run) pretend virtualization is off in the BIOS</td></tr>
+          <tr><td>--resume</td><td>(with --dry-run) preview the "welcome back after a restart" screen</td></tr>
+          <tr><td>--go</td><td>Skip the fireworks and go straight to the guide</td></tr>
+          <tr><td>--quiet</td><td>No music (or press M on the title screen)</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="honest">
+    <div class="wrap">
+      <h2>What it changes <span class="alt">on your PC</span></h2>
+      <div class="panel">
+        <ul class="honest">
+          <li>Windows features: <i>Windows Subsystem for Linux</i> and <i>Virtual Machine Platform</i>.</li>
+          <li><code>%USERPROFILE%\.wslconfig</code> (the old one is backed up first).</li>
+          <li>Fixed IP option: a line in <code>/etc/wsl.conf</code>, a scheduled task <code>Greenhorn-WSL-FixedIP</code>, a helper script in <code>C:\ProgramData\GreenhornWSL</code>, and <code>wsl.local</code> in the hosts file.</li>
+          <li>During the run only: the restart safety net and, if you use it, a temporary firewall rule for the APK shop. Both are removed again.</li>
+        </ul>
+        <p class="c-dim">Everything is in one readable file. No downloads, no dependencies, no telemetry.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><span>WINDOWS SUBSYSTEMS FOR LINUX INSTALLER FOR DUMMIES v.0.1 &#160;&#160;&#9733;&#160;&#160; SENTINEL HAS GOT YOUR BACK &#160;&#160;&#9733;&#160;&#160; NO PANIC, JUST PRESS ENTER &#160;&#160;&#9733;&#160;&#160;</span></div>
+  <footer>
+    <div class="sig">Sentinel has got your back.</div>
+    <div>Made with fireworks, a chiptune and a lot of love &#183; part of the Sentinel Armory</div>
+  </footer>
+</main>
+<div id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- xterm 256 palette ----------
+  const BASE16 = ['#000000','#800000','#008000','#808000','#000080','#800080','#008080','#c0c0c0',
+                  '#808080','#ff0000','#00ff00','#ffff00','#0000ff','#ff00ff','#00ffff','#ffffff'];
+  const LV = [0, 95, 135, 175, 215, 255];
+  const PAL = [];
+  for (let n = 0; n < 256; n++) {
+    if (n < 16) PAL.push(BASE16[n]);
+    else if (n < 232) { const i = n - 16; PAL.push(`rgb(${LV[Math.floor(i / 36)]},${LV[Math.floor(i / 6) % 6]},${LV[i % 6]})`); }
+    else { const g = 8 + 10 * (n - 232); PAL.push(`rgb(${g},${g},${g})`); }
+  }
+
+  // ---------- glyphs (same pixel maps as the .bat) ----------
+  const BIG = {
+    G: ['     ', ' ####', '#    ', '#  ##', '#   #', ' ####'],
+    R: ['     ', '#### ', '#   #', '#### ', '#  # ', '#   #'],
+    E: ['     ', '#####', '#    ', '#### ', '#    ', '#####'],
+    N: ['     ', '#   #', '##  #', '# # #', '#  ##', '#   #'],
+    H: ['     ', '#   #', '#   #', '#####', '#   #', '#   #'],
+    O: ['     ', ' ### ', '#   #', '#   #', '#   #', ' ### ']
+  };
+  const MINI = {
+    T: ['###', '.#.', '.#.', '.#.', '.#.'],         H: ['#..#', '#..#', '####', '#..#', '#..#'],
+    E: ['####', '#...', '###.', '#...', '####'],     S: ['.###', '#...', '.##.', '...#', '###.'],
+    N: ['#..#', '##.#', '#.##', '#..#', '#..#'],     I: ['###', '.#.', '.#.', '.#.', '###'],
+    L: ['#...', '#...', '#...', '#...', '####'],     W: ['#...#', '#...#', '#.#.#', '##.##', '#...#'],
+    A: ['.##.', '#..#', '####', '#..#', '#..#'],     R: ['###.', '#..#', '###.', '#.#.', '#..#'],
+    D: ['###.', '#..#', '#..#', '#..#', '###.'],     '!': ['#', '#', '#', '.', '#']
+  };
+  const TINY = {
+    A: ['.#.', '#.#', '###', '#.#'], B: ['##.', '###', '#.#', '###'], D: ['##.', '#.#', '#.#', '##.'],
+    E: ['###', '##.', '#..', '###'], F: ['###', '#..', '##.', '#..'], I: ['###', '.#.', '.#.', '###'],
+    L: ['#..', '#..', '#..', '###'], M: ['#...#', '##.##', '#.#.#', '#...#'], N: ['#..#', '##.#', '#.##', '#..#'],
+    O: ['###', '#.#', '#.#', '###'], R: ['##.', '#.#', '##.', '#.#'], S: ['.##', '#..', '..#', '##.'],
+    T: ['###', '.#.', '.#.', '.#.'], U: ['#.#', '#.#', '#.#', '###'], X: ['#.#', '.#.', '.#.', '#.#'],
+    Y: ['#.#', '#.#', '.#.', '.#.'], W: ['#...#', '#...#', '#.#.#', '.#.#.'], v: ['...', '#.#', '#.#', '.#.'],
+    '.': ['.', '.', '.', '#'], '0': ['.#.', '#.#', '#.#', '.#.'], '1': ['.#', '##', '.#', '.#']
+  };
+  const SPARKLE = [196, 208, 226, 46, 51, 33, 201, 231, 214, 129, 87, 219];
+  const MORPH_COLS = [213, 207, 171, 135, 99, 63, 69, 75, 81, 87];
+  const NEON_CORE = [51, 87, 123, 159, 195], NEON_EDGE = [31, 38, 39, 44, 45];
+
+  const TRICKS = [
+    { T: 'spin', P: 3.2, O: 0 }, { T: 'swapA' }, { T: 'swapB' }, { T: 'ball', O: 0, A: 5 },
+    { T: 'flip', P: 4.5, O: 1 }, { T: 'wave' }, { T: 'bob', O: 0 }, { T: 'morph' },
+    { T: 'wave' }, { T: 'ball', O: 1.2, A: 3 }, { T: 'flip', P: 5, O: 2.7 }, { T: 'wave' },
+    { T: 'spin', P: 5.5, O: 3 }, { T: 'bob', O: 1 }, { T: 'wave' }, { T: 'flip', P: 6, O: 0.5 }
+  ];
+  const EXTRA = [{ T: 'spin', P: 4.7, O: 2.2 }, { T: 'wave' }, { T: 'flip', P: 5.3, O: 1.8 },
+                 { T: 'ball', O: 0.6, A: 3 }, { T: 'bob', O: 2 }, { T: 'wave' }];
+
+  function newFunLine(text, pal, calm) {
+    const letters = []; let x = 0, n = 0;
+    for (const ch of text) {
+      if (ch === ' ') { x += 3; continue; }
+      const rows = MINI[ch];
+      const tr = calm ? { T: 'wave' } : (n < TRICKS.length ? TRICKS[n] : EXTRA[n % EXTRA.length]);
+      letters.push({ rows, w: rows[0].length, x, tr, hop: 0 });
+      x += rows[0].length + 1; n++;
+    }
+    return { letters, width: x - 1, pal, calm, morph: null };
+  }
+
+  function marqueeCols(text, gap) {
+    const out = [];
+    for (const ch of text) {
+      if (ch === ' ') { out.push(0, 0, 0); continue; }
+      const g = TINY[ch]; if (!g) continue;
+      for (let c = 0; c < g[0].length; c++) {
+        let m = 0; for (let r = 0; r < 4; r++) if (g[r][c] === '#') m |= 1 << r;
+        out.push(m);
+      }
+      out.push(0);
+    }
+    for (let i = 0; i < gap; i++) out.push(0);
+    return out;
+  }
+
+  // ---------- the title screen, ported from Show-Intro -Fun ----------
+  const W = 119, H = 30;
+  const canvas = document.getElementById('tui');
+  const ctx = canvas.getContext('2d');
+  let cw = 8, chh = 16;
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.parentElement.clientWidth;
+    cw = cssW / W; chh = cw * 2.05;
+    canvas.style.height = (chh * H) + 'px';
+    canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(chh * H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.font = `${Math.round(chh * 0.86)}px "Cascadia Mono", Consolas, "VT323", monospace`;
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+  }
+  addEventListener('resize', resize);
+
+  const chars = new Array(W * H), cols = new Int16Array(W * H);
+  const half = new Uint8Array(W * H), hcol = new Int16Array(W * H);
+  let parts = [];
+  const mini1 = newFunLine('THE SENTINEL', { base: 213, alt: 141, shine: 225 }, false);
+  const mini3 = newFunLine('WSL INSTALLER HAS LANDED!', { base: 141, alt: 141, shine: 189 }, true);
+  const big = []; { let bx = 0; for (const ch of 'GREENHORN') { big.push({ ch, x: bx }); bx += 11; } }
+  const bigW = big.length * 11 - 1, holeI = 6, bigO = BIG.O.slice(1);
+  const marquee = marqueeCols('WINDOWS SUBSYSTEMS FOR LINUX INSTALLER FOR DUMMIES v.0.1', 40);
+  let musicOn = false;
+
+  function put(x, y, ch, c) { if (x >= 0 && x < W && y >= 0 && y < H) { chars[y * W + x] = ch; cols[y * W + x] = c; } }
+  function text(y, x0, s, c) { for (let i = 0; i < s.length; i++) put(x0 + i, y, s[i], c); }
+
+  function addMiniLine(line, row, sec, t) {
+    if (line.width > W - 2) return;
+    const mx0 = Math.round((W - line.width) / 2), py0 = row * 2;
+    const swapK = Math.floor((sec + 3) / 5), swapPh = (sec + 3) - swapK * 5;
+    const swapP = swapPh < 0.9 ? (1 - Math.cos(swapPh / 0.9 * Math.PI)) / 2 : 1;
+    const swapArc = swapPh < 0.9 ? Math.sin(swapPh / 0.9 * Math.PI) * 4 : 0;
+    let dA = null, dB = null;
+    for (const g of line.letters) { if (g.tr.T === 'swapA') dA = g.x; else if (g.tr.T === 'swapB') dB = g.x; }
+    if (!line.calm && Math.random() < 0.01) line.letters[Math.floor(Math.random() * line.letters.length)].hop = sec + 0.45;
+    const shine = (t * 1.2) % (line.width + 30) - 15;
+    let li = 0;
+    for (const g of line.letters) {
+      const tr = g.tr; let sx = 1, sy = 1, lx = g.x, dy = 0, rows = g.rows, abs = false, acx = 0, acy = 0, mcol = null, msc = 1;
+      switch (tr.T) {
+        case 'spin': { const ph = (sec + tr.O) % tr.P; if (ph < 0.8) sx = Math.cos(ph / 0.8 * 2 * Math.PI); break; }
+        case 'flip': {
+          const ph = (sec + tr.O) % tr.P;
+          if (ph < 0.4) sy = Math.cos(ph / 0.4 * Math.PI);
+          else if (ph < 1.6) sy = -1;
+          else if (ph < 2.0) sy = Math.cos(Math.PI + (ph - 1.6) / 0.4 * Math.PI);
+          break;
+        }
+        case 'ball': dy = -Math.abs(Math.sin(sec * 4 + tr.O)) * tr.A; break;
+        case 'bob': dy = Math.sin(sec * 3 + tr.O) * 2; break;
+        case 'wave': dy = Math.sin(sec * 2.5 + li * 0.6); break;
+        case 'swapA': { const a = swapK % 2 === 0 ? dA : dB, b = swapK % 2 === 0 ? dB : dA; lx = a + (b - a) * swapP; dy = -swapArc; break; }
+        case 'swapB': { const a = swapK % 2 === 0 ? dB : dA, b = swapK % 2 === 0 ? dA : dB; lx = a + (b - a) * swapP; dy = swapArc; break; }
+        case 'morph': {
+          const mp = line.morph; if (!mp) { dy = Math.sin(sec * 3) * 2; break; }
+          const ph = sec % 9;
+          const p = ph < 2.5 ? 0 : ph < 3.5 ? ph - 2.5 : ph < 8 ? 1 : 9 - ph;
+          const e = (1 - Math.cos(p * Math.PI)) / 2;
+          const hx = mx0 + g.x + g.w / 2, hy = py0 + 2.5 + Math.sin(sec * 3) * 1.5;
+          acx = hx + (mp.x - hx) * e; acy = hy + (mp.y - hy) * e - Math.sin(e * Math.PI) * 3; abs = true;
+          msc = 1 + (mp.scale - 1) * e;
+          if (e < 0.5) sy = 1 - 2 * e; else { rows = mp.rows; sy = 2 * e - 1; }
+          if (e >= 1) mcol = mp.col; else if (e > 0) mcol = MORPH_COLS[Math.floor(e * (MORPH_COLS.length - 1))];
+          break;
+        }
+      }
+      if (g.hop > sec) dy -= Math.sin((g.hop - sec) / 0.45 * Math.PI) * 3;
+      let col = Math.abs(lx + g.w / 2 - shine) < 3 ? line.pal.shine : tr.T === 'swapB' ? line.pal.alt : line.pal.base;
+      if (mcol) col = mcol;
+      const gh = rows.length, gw = rows[0].length;
+      const ww = Math.max(1, Math.round(gw * Math.abs(sx) * msc)), hh = Math.max(1, Math.round(gh * Math.abs(sy) * msc));
+      let cx = mx0 + lx + gw / 2, cy = py0 + 5 - gh / 2 + dy;
+      if (abs) { cx = acx; cy = acy; }
+      for (let oy = 0; oy < hh; oy++) {
+        let sr = Math.floor(oy * gh / hh); if (sy < 0) sr = gh - 1 - sr;
+        const py = Math.floor(cy - hh / 2 + oy);
+        if (py < 0 || (py >> 1) >= H) continue;
+        for (let ox = 0; ox < ww; ox++) {
+          let sc = Math.floor(ox * gw / ww); if (sx < 0) sc = gw - 1 - sc;
+          if (rows[sr][sc] !== '#') continue;
+          const px = Math.floor(cx - ww / 2 + ox);
+          if (px < 0 || px >= W) continue;
+          const idx = (py >> 1) * W + px;
+          half[idx] |= 1 + (py & 1); hcol[idx] = col;
+        }
+      }
+      li++;
+    }
+  }
+
+  function frame(t) {
+    chars.fill(undefined); half.fill(0);
+    const sec = t * 0.045;
+
+    // rockets and sparks
+    let rockets = 0; for (const p of parts) if (p.kind === 0) rockets++;
+    if (rockets < 3 && Math.random() < 0.12)
+      parts.push({ x: 4 + Math.floor(Math.random() * (W - 8)), y: H - 1, vx: (Math.random() - 0.5) * 0.4, vy: -0.9 - Math.random() * 0.6, life: 99, c: SPARKLE[Math.floor(Math.random() * SPARKLE.length)], kind: 0 });
+    const next = [];
+    for (const p of parts) {
+      if (p.kind === 0) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.025;
+        if (p.vy >= -0.15 || p.y < 2) {
+          const n = 28 + Math.floor(Math.random() * 27);
+          for (let i = 0; i < n; i++) {
+            const a = Math.random() * 6.2832, s = 0.25 + Math.random() * 0.9;
+            const c = Math.random() < 0.75 ? p.c : SPARKLE[Math.floor(Math.random() * SPARKLE.length)];
+            next.push({ x: p.x, y: p.y, vx: Math.cos(a) * s * 2, vy: Math.sin(a) * s, life: 14 + Math.floor(Math.random() * 18), c, kind: 1 });
+          }
+        } else {
+          next.push(p);
+          const ix = Math.round(p.x), iy = Math.round(p.y);
+          put(ix, iy, '|', 250); put(ix, iy + 1, '.', 208);
+        }
+      } else {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.vx *= 0.96; p.life--;
+        const ix = Math.round(p.x), iy = Math.round(p.y);
+        if (p.life > 0 && ix >= 0 && ix < W && iy >= 0 && iy < H) {
+          next.push(p);
+          const ch = p.life > 22 ? '*' : p.life > 12 ? '+' : p.life > 5 ? '\u00b7' : '.';
+          const c = p.life < 6 ? 240 : Math.random() < 0.08 ? 231 : p.c;
+          put(ix, iy, ch, c);
+        }
+      }
+    }
+    parts = next;
+
+    // title
+    const top = 0;
+    const bx0 = Math.round((W - bigW) / 2), bpy0 = (top + 7) * 2;
+    const shineX = (t * 2) % (bigW + 40) - 20;
+    const pulse = Math.round((Math.sin(sec * 3) + 1) * 2);
+    const core = NEON_CORE[pulse], edge = NEON_EDGE[pulse];
+    const dyO = Math.round(Math.sin(sec * 2 + holeI * 0.9) * 1.5);
+    mini1.morph = { x: bx0 + big[holeI].x + 5, y: bpy0 + 7 + dyO, col: core, rows: bigO, scale: 2 };
+    addMiniLine(mini1, top + 3, sec, t);
+    for (let i = 0; i < big.length; i++) {
+      if (i === holeI) continue;
+      const rows = BIG[big[i].ch];
+      const dy = Math.round(Math.sin(sec * 2 + i * 0.9) * 1.5);
+      for (let r = 0; r < 6; r++) {
+        const row = rows[r];
+        for (let c = 0; c < 5; c++) {
+          if (row[c] !== '#') continue;
+          const baseX = bx0 + big[i].x + c * 2;
+          const shiny = Math.abs(baseX - bx0 + r * 2 - shineX) < 4;
+          const leftEdge = c === 0 || row[c - 1] !== '#', rightEdge = c === 4 || row[c + 1] !== '#';
+          for (let a = 0; a < 2; a++) {
+            const py = bpy0 + r * 2 + a + dy;
+            if (py < 0 || (py >> 1) >= H) continue;
+            for (let b = 0; b < 2; b++) {
+              const px = baseX + b; if (px < 0 || px >= W) continue;
+              const idx = (py >> 1) * W + px;
+              half[idx] |= 1 + (py & 1);
+              hcol[idx] = shiny ? 231 : ((b === 0 && leftEdge) || (b === 1 && rightEdge)) ? edge : core;
+            }
+          }
+        }
+      }
+    }
+    addMiniLine(mini3, top + 15, sec, t);
+    const mRow = top + 19;
+    for (let x = 0; x < W; x++) {
+      const m = marquee[(t + x) % marquee.length]; if (!m) continue;
+      const c = x < 4 || x >= W - 4 ? 94 : x < 9 || x >= W - 9 ? 172 : 214;
+      const up = m & 3, dn = (m >> 2) & 3;
+      if (up) { const i = mRow * W + x; half[i] |= up; hcol[i] = c; }
+      if (dn) { const i = (mRow + 1) * W + x; half[i] |= dn; hcol[i] = c; }
+    }
+
+    // menu + music hint
+    const menu = [['Need a hand installing WSL (Linux inside Windows)?', 231], ['', 0],
+                  ['[1]  Yes please - show me the way!', 46], ['[2]  No thanks - get me out of here', 203]];
+    let my = H - 6;
+    for (const [s, c] of menu) { let x0 = Math.round((W - 44) / 2); if (s.length > 44) x0 = Math.round((W - s.length) / 2); text(my, x0, s, c); my++; }
+    const hint = musicOn ? '\u266a m = stop the disco' : 'm = DISCO! \u266b';
+    text(H - 1, W - hint.length - 1, hint, 239);
+  }
+
+  function draw() {
+    ctx.fillStyle = '#0b0b12'; ctx.fillRect(0, 0, W * cw, H * chh);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x, hb = half[i];
+        if (hb) {
+          ctx.fillStyle = PAL[hcol[i]];
+          const x0 = x * cw - 0.25, w = cw + 0.5, y0 = y * chh;
+          if (hb === 3) ctx.fillRect(x0, y0 - 0.25, w, chh + 0.5);
+          else if (hb === 1) ctx.fillRect(x0, y0 - 0.25, w, chh / 2 + 0.25);
+          else ctx.fillRect(x0, y0 + chh / 2, w, chh / 2 + 0.25);
+          continue;
+        }
+        const ch = chars[i];
+        if (ch !== undefined && ch !== ' ') { ctx.fillStyle = PAL[cols[i]]; ctx.fillText(ch, x * cw + cw / 2, y * chh + chh / 2); }
+      }
+    }
+  }
+
+  let t = 0, acc = 0, last = performance.now();
+  function loop(now) {
+    acc += Math.min(250, now - last); last = now;
+    while (acc >= 45) { frame(t); t++; acc -= 45; }
+    draw();
+    requestAnimationFrame(loop);
+  }
+  resize();
+  if (reduced) { for (let i = 0; i < 40; i++) frame(i); t = 40; draw(); }
+  else requestAnimationFrame(loop);
+
+  // ---------- the chiptune, ported from the C# synth ----------
+  let audio = null, src = null, gain = null;
+  function renderTune(SR) {
+    const MELODY = ['E5:3 D5:3 C5:2 A4:2 C5:2 D5:2 E5:2', 'F5:3 E5:3 C5:2 A4:4 R:4', 'G5:3 E5:3 C5:2 E5:2 G5:2 A5:2 G5:2',
+                    'D5:6 B4:2 G4:4 R:4', 'A5:3 G5:3 E5:2 D5:2 E5:2 G5:2 A5:2', 'C6:3 A5:3 F5:2 A5:4 C6:4',
+                    'G5:2 E5:2 G5:2 C6:2 B5:2 G5:2 E5:2 D5:2', 'B5:4 D6:4 B5:2 G5:2 R:4'];
+    const CHORDS = [[57, 60, 64], [53, 57, 60], [55, 60, 64], [55, 59, 62]], ROOTS = [45, 41, 48, 43];
+    const freq = m => 440 * Math.pow(2, (m - 69) / 12);
+    const midi = n => { const semi = { A: 9, B: 11, C: 0, D: 2, E: 4, F: 5, G: 7 }; let s = semi[n[0]], i = 1; if (n[i] === '#') { s++; i++; } return 12 * (+n[i] + 1) + s; };
+    let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const stepLen = Math.floor(60 / 128 / 4 * SR), steps = MELODY.length * 16, total = steps * stepLen;
+    const lead = new Float32Array(total), mix = new Float32Array(total);
+    let pos = 0;
+    for (const bar of MELODY) for (const tok of bar.split(' ')) {
+      const [nm, l] = tok.split(':'); const len = +l * stepLen;
+      if (nm !== 'R') {
+        const f = freq(midi(nm)); let ph = 0, lp = 0;
+        for (let i = 0; i < len; i++) {
+          const tt = i / SR, rest = (len - i) / SR;
+          const vib = tt > 0.15 ? Math.sin(2 * Math.PI * 5.5 * tt) * 0.25 / 12 : 0;
+          ph += f * Math.pow(2, vib) / SR; ph -= Math.floor(ph);
+          lp += 0.3 * ((ph < 0.25 ? 1 : -1) - lp);
+          const env = Math.min(1, tt / 0.005) * Math.min(1, rest / 0.03) * (0.7 + 0.3 * Math.exp(-tt * 6));
+          lead[(pos + i) % total] += lp * env * 0.2;
+        }
+      }
+      pos += len;
+    }
+    const d = 3 * stepLen;
+    for (let i = 0; i < total; i++) mix[i] += lead[i] + 0.3 * lead[(i - d + total) % total] + 0.12 * lead[(i - 2 * d + 2 * total) % total];
+    const tick = Math.floor(stepLen / 3);
+    for (let s = 0; s < steps; s++) {
+      const ch = CHORDS[Math.floor(s / 16) % 4];
+      for (let k = 0; k < 3; k++) {
+        const f = freq(ch[(s * 3 + k) % 3] + 12); let ph = 0; const start = s * stepLen + k * tick;
+        for (let i = 0; i < tick; i++) { ph += f / SR; ph -= Math.floor(ph); const tt = i / SR; mix[(start + i) % total] += (ph < 0.5 ? 1 : -1) * 0.045 * Math.min(1, tt / 0.001) * Math.exp(-tt * 20); }
+      }
+    }
+    for (let e = 0; e < steps / 2; e++) {
+      const f = freq(ROOTS[Math.floor(e / 8) % 4] + (e % 2 === 1 ? 12 : 0)); let ph = 0.25;
+      const start = e * 2 * stepLen, len = 2 * stepLen - Math.floor(SR / 100);
+      for (let i = 0; i < len; i++) { ph += f / SR; ph -= Math.floor(ph); const tt = i / SR; mix[(start + i) % total] += (4 * Math.abs(ph - 0.5) - 1) * 0.22 * Math.min(1, tt / 0.003) * Math.exp(-tt * 5); }
+    }
+    const kick = st => { let ph = 0; for (let i = 0; i < SR / 4; i++) { const tt = i / SR; ph += (45 + 110 * Math.exp(-tt * 30)) / SR; mix[(st + i) % total] += Math.sin(2 * Math.PI * ph) * 0.5 * Math.exp(-tt * 9); } };
+    const snare = st => { let ph = 0; for (let i = 0; i < SR / 5; i++) { const tt = i / SR; ph += 185 / SR; mix[(st + i) % total] += (rnd() * 2 - 1) * 0.2 * Math.exp(-tt * 16) + Math.sin(2 * Math.PI * ph) * 0.12 * Math.exp(-tt * 25); } };
+    const hat = (st, amp) => { let prev = 0; for (let i = 0; i < SR / 25; i++) { const tt = i / SR, n = rnd() * 2 - 1; mix[(st + i) % total] += (n - prev) * amp * Math.exp(-tt * 70); prev = n; } };
+    for (let s = 0; s < steps; s++) {
+      const st = s * stepLen, b = s % 16;
+      if (b === 0 || b === 8 || (b === 10 && Math.floor(s / 16) % 2 === 1)) kick(st);
+      if (b === 4 || b === 12) snare(st);
+      if (b % 4 === 2) hat(st, 0.05); else if (b % 2 === 1) hat(st, 0.022);
+    }
+    for (let i = 0; i < total; i++) mix[i] = Math.tanh(mix[i] * 1.1) * 0.3;
+    return mix;
+  }
+  function setMusic(on) {
+    if (on) {
+      if (!audio) {
+        audio = new (window.AudioContext || window.webkitAudioContext)();
+        const SR = 22050, data = renderTune(SR);
+        const buf = audio.createBuffer(1, data.length, SR); buf.copyToChannel(data, 0);
+        gain = audio.createGain(); gain.gain.value = 1; gain.connect(audio.destination);
+        src = audio.createBufferSource(); src.buffer = buf; src.loop = true; src.connect(gain); src.start();
+      } else audio.resume();
+      musicOn = true;
+    } else { if (audio) audio.suspend(); musicOn = false; }
+  }
+
+  // ---------- interaction ----------
+  const toast = document.getElementById('toast');
+  let toastT = 0;
+  function say(msg) { toast.textContent = msg; toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('show'), 2600); }
+  function choose(k) {
+    if (k === '1') { document.getElementById('download').scrollIntoView(); burstAt(document.getElementById('dl')); }
+    else if (k === '2') say('Bye bye, Mr. Greenhorn! *waves* Help is here whenever you need it.');
+    else if (k === 'm') setMusic(!musicOn);
+  }
+  canvas.addEventListener('click', e => {
+    const r = canvas.getBoundingClientRect(), row = Math.floor((e.clientY - r.top) / (r.height / H));
+    if (row === H - 4) choose('1'); else if (row === H - 3) choose('2'); else choose('m');
+  });
+  addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase(); if (k === '1' || k === '2' || k === 'm') choose(k);
+  });
+
+  // ---------- background stars ----------
+  const stars = document.getElementById('stars'), sctx = stars.getContext('2d');
+  let starList = [];
+  function sizeStars() {
+    stars.width = innerWidth; stars.height = innerHeight;
+    starList = Array.from({ length: Math.round(innerWidth * innerHeight / 9000) }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight * 0.75, r: Math.random() * 1.3 + 0.2, p: Math.random() * 6.28 }));
+  }
+  sizeStars(); addEventListener('resize', sizeStars);
+  function twinkle(now) {
+    sctx.clearRect(0, 0, stars.width, stars.height);
+    for (const s of starList) { sctx.globalAlpha = 0.35 + 0.35 * Math.sin(now / 900 + s.p); sctx.fillStyle = '#d7d7ff'; sctx.fillRect(s.x, s.y, s.r, s.r); }
+    if (!reduced) requestAnimationFrame(twinkle);
+  }
+  requestAnimationFrame(twinkle);
+
+  // ---------- spark bursts (download button) ----------
+  const sp = document.getElementById('sparks'), spx = sp.getContext('2d');
+  let sparks = [];
+  function sizeSparks() { sp.width = innerWidth; sp.height = innerHeight; }
+  sizeSparks(); addEventListener('resize', sizeSparks);
+  function burst(x, y, n) {
+    if (reduced) return;
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = 1.5 + Math.random() * 4; sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1.5, life: 40 + Math.random() * 30, c: PAL[SPARKLE[Math.floor(Math.random() * SPARKLE.length)]] }); }
+    if (sparks.length === n) requestAnimationFrame(sparkLoop);
+  }
+  function burstAt(el) { const r = el.getBoundingClientRect(); setTimeout(() => { const r2 = el.getBoundingClientRect(); burst(r2.left + r2.width / 2, r2.top + r2.height / 2, 70); }, 450); }
+  function sparkLoop() {
+    spx.clearRect(0, 0, sp.width, sp.height);
+    for (const s of sparks) { s.x += s.vx; s.y += s.vy; s.vy += 0.12; s.vx *= 0.98; s.life--; spx.globalAlpha = Math.max(0, s.life / 60); spx.fillStyle = s.c; spx.fillRect(s.x, s.y, 3, 3); }
+    sparks = sparks.filter(s => s.life > 0);
+    if (sparks.length) requestAnimationFrame(sparkLoop); else spx.clearRect(0, 0, sp.width, sp.height);
+  }
+  const dl = document.getElementById('dl');
+  dl.addEventListener('mouseenter', () => { const r = dl.getBoundingClientRect(); burst(r.left + r.width / 2, r.top, 26); });
+  dl.addEventListener('click', () => { const r = dl.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 90); });
+
+  // ---------- the steps, typed out as you scroll ----------
+  const STEPS = [
+    ['Saying hello to your PC', 'Checks Windows, memory, disk space and virtualization. Off in the BIOS? It finds out who made your PC, tells you which menu to look in, and restarts straight into the BIOS for you.'],
+    ['The WSL engine', 'Switches on the right Windows features, with a plan B (DISM) if the normal way fails.'],
+    ['Picking a Linux', 'Installs Ubuntu and explains the username and password prompt in plain words. (The password does NOT show while you type. Totally normal.)'],
+    ['Fixed IP address', 'Sniffs out your router, picks a private network that clashes with nothing, checks the addresses are free, and gives Linux an IP that never changes.'],
+    ['Speed and memory', 'A sensible .wslconfig: memory limit, swap, memory reclaim and a sparse disk that shrinks by itself.'],
+    ['Setting up the fixed IP', 'Both sides of the link, plus the name wsl.local in the Windows hosts file.'],
+    ['Spring cleaning the disk', 'Takes out the trash inside Linux and compacts the virtual disk, so the space actually comes back to Windows.'],
+    ['Does Linux work? (the big test)', 'Linux answers, runs WSL 2, has systemd and can reach the internet.'],
+    ['Next stop: Tortugarr on GitHub!', 'A bonus: downloads the Tortugarr server installer and apps, checks the checksums, and can even serve the apps to your TV and phone over Wi-Fi.'],
+    ['Done! Hooray!', 'A fireworks finale, a list of handy tricks, and the safety net is taken down again.']
+  ];
+  const CHEERS = ['Yay! You did it!', 'Hooray! Give yourself a pat on the back, Mr. Greenhorn!', 'Brilliant, Mr. Greenhorn! Bang on target!',
+                  'Good job! You get a gold star in your book today!', 'Woohoo! That went like clockwork!',
+                  'High five! That was easier than assembling IKEA furniture, right?', "Look at you go! You'll be fixing other people's computers next!",
+                  'Yippee! Somebody get this man a cape!', "Thumbs up! You're a natural, Mr. Greenhorn!", 'Boom! Not bad at all for a greenhorn!'];
+  const grid = document.getElementById('stepgrid');
+  STEPS.forEach(([title, body], i) => {
+    const el = document.createElement('div');
+    el.className = 'step panel tty';
+    el.innerHTML = `<div class="rule">${'='.repeat(34)}</div><div class="num">  STEP ${i + 1}/10  -  ${title}</div><div class="rule">${'='.repeat(34)}</div>` +
+                   `<div class="c-info body"></div><div class="c-yay yay"></div>`;
+    el.dataset.body = body; el.dataset.yay = `*** ${CHEERS[i % CHEERS.length]} ***`;
+    grid.appendChild(el);
+  });
+  function typeInto(node, textStr, speed, done) {
+    if (reduced) { node.textContent = textStr; done && done(); return; }
+    let i = 0; const cur = document.createElement('span'); cur.className = 'cursor'; cur.innerHTML = '&nbsp;';
+    const tick = () => { node.textContent = textStr.slice(0, ++i); node.appendChild(cur); if (i < textStr.length) setTimeout(tick, speed); else { cur.remove(); done && done(); } };
+    tick();
+  }
+  const io = new IntersectionObserver(entries => {
+    for (const en of entries) {
+      if (!en.isIntersecting || en.target.dataset.done) continue;
+      const el = en.target; el.dataset.done = 1; el.classList.add('seen');
+      typeInto(el.querySelector('.body'), '  [i]   ' + el.dataset.body, 12, () => setTimeout(() => typeInto(el.querySelector('.yay'), '  ' + el.dataset.yay, 18), 250));
+    }
+  }, { threshold: 0.35 });
+  grid.querySelectorAll('.step').forEach(s => io.observe(s));
+
+  // ---------- the oops demo ----------
+  const OOPS = [
+    ['c-dim', "  [DRY-RUN] Back up the old .wslconfig"],
+    ['', ''],
+    ['c-oops', '  Yikes, an error! But only a teeny tiny one.'],
+    ['c-dim', '     (What happened: Back up the old .wslconfig went belly up)'],
+    ['c-comfort', '  Relax! Even the best of us hear "no" now and then. Sentinel has got your back!'],
+    ['c-fix', "  Do this and we're back on track: take a screenshot (Win+Shift+S) and send it to Sentinel - we'll take it from there."],
+    ['', ''],
+    ['c-yay', "  *** Look at you go! You'll be fixing other people's computers next! ***"]
+  ];
+  const oopsEl = document.getElementById('oopsdemo');
+  const oio = new IntersectionObserver(es => {
+    if (!es[0].isIntersecting || oopsEl.dataset.done) return;
+    oopsEl.dataset.done = 1;
+    let k = 0;
+    const nextLine = () => {
+      if (k >= OOPS.length) return;
+      const [cls, s] = OOPS[k++]; const d = document.createElement('div'); d.className = cls; oopsEl.appendChild(d);
+      if (!s) { d.innerHTML = '&nbsp;'; setTimeout(nextLine, 150); } else typeInto(d, s, 10, () => setTimeout(nextLine, 220));
+    };
+    nextLine();
+  }, { threshold: 0.4 });
+  oio.observe(oopsEl);
+})();
+</script>
+</body>
+</html>
